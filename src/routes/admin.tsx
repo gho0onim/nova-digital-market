@@ -30,11 +30,67 @@ const STATUS: Record<Product["status"], { l: string; c: string }> = {
 };
 const ORDER_STATUS: Record<Order["status"], string> = { pending: "قيد الانتظار", "paid-demo": "مدفوع (تجريبي)", "delivered-demo": "تم التسليم (تجريبي)" };
 
+function useDbOrders() {
+  const [rows, setRows] = useState<Order[] | null>(null);
+  const [state, setState] = useState<"loading" | "guest" | "forbidden" | "ok" | "error">("loading");
+  const load = async () => {
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) { setState("guest"); return; }
+    const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+    if (error) { setState("error"); return; }
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: u.user.id, _role: "admin" });
+    if (!isAdmin) { setState("forbidden"); return; }
+    setRows(data.map((r) => ({ id: r.id, createdAt: r.created_at, customer: r.customer, phone: r.phone, email: r.email, payment: r.payment, items: r.items as Order["items"], total: Number(r.total), status: r.status as Order["status"] })));
+    setState("ok");
+  };
+  useEffect(() => {
+    load();
+    const { data } = supabase.auth.onAuthStateChange((e) => { if (e === "SIGNED_IN" || e === "SIGNED_OUT") load(); });
+    return () => data.subscription.unsubscribe();
+  }, []);
+  return { rows, state, setRows };
+}
+
+function AdminLogin({ state }: { state: string }) {
+  const [email, setEmail] = useState(""); const [pw, setPw] = useState(""); const [busy, setBusy] = useState(false);
+  if (state === "forbidden") return (
+    <div className="mb-6 rounded-2xl border border-warning/50 bg-warning/10 p-4 text-sm text-warning">
+      حسابك مش أدمن، فشايف طلبات جهازك بس. <button className="underline" onClick={() => supabase.auth.signOut()}>خروج</button>
+    </div>
+  );
+  return (
+    <form className="mb-6 flex flex-wrap items-end gap-2 rounded-2xl border bg-card p-4" onSubmit={async (e) => {
+      e.preventDefault(); setBusy(true);
+      const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
+      setBusy(false); if (error) toast.error("بيانات الدخول غلط");
+    }}>
+      <p className="w-full text-sm text-muted-foreground">سجّل دخول كأدمن عشان تشوف كل الطلبات المحفوظة في قاعدة البيانات.</p>
+      <Input dir="ltr" type="email" placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-10 w-56" />
+      <Input dir="ltr" type="password" placeholder="password" value={pw} onChange={(e) => setPw(e.target.value)} className="h-10 w-48" />
+      <Button disabled={busy}>دخول</Button>
+    </form>
+  );
+}
+
 function Admin() {
-  const { products, setProducts, resetCatalog, orders, updateOrder } = useStore();
+  const { products, setProducts, resetCatalog, orders: localOrders, updateOrder: updateLocal } = useStore();
+  const db = useDbOrders();
+  const orders = db.state === "ok" && db.rows ? db.rows : localOrders;
+  const updateOrder = async (id: string, status: Order["status"]) => {
+    if (db.state === "ok") {
+      const { error } = await supabase.from("orders").update({ status }).eq("id", id);
+      if (error) return toast.error("ماقدرناش نحدث الطلب");
+      db.setRows((r) => r && r.map((o) => (o.id === id ? { ...o, status } : o)));
+      toast.success("تم تحديث الطلب");
+    } else updateLocal(id, status);
+  };
   const [edit, setEdit] = useState<Product | null>(null);
   const revenue = orders.reduce((s, o) => s + o.total, 0);
   const low = products.filter((p) => p.stock > 0 && p.stock < 10).length;
+  const dayAgo = Date.now() - 864e5;
+  const fresh = orders.filter((o) => new Date(o.createdAt).getTime() > dayAgo);
+  const pending = orders.filter((o) => o.status === "pending");
+  const byPay = Object.entries(fresh.reduce<Record<string, number>>((a, o) => ((a[o.payment] = (a[o.payment] || 0) + 1), a), {}));
 
   const save = (p: Product) => {
     setProducts((l) => (l.some((x) => x.id === p.id) ? l.map((x) => (x.id === p.id ? p : x)) : [p, ...l]));
