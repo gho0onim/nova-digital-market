@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Pencil, Plus, RotateCcw, Trash2, Package, Receipt, TrendingUp, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,12 +109,26 @@ function Admin() {
         <Button variant="outline" onClick={() => { resetCatalog(); toast("رجّعنا الكتالوج الافتراضي"); }}><RotateCcw /> استرجاع الكتالوج</Button>
       </div>
 
+      {db.state !== "ok" && db.state !== "loading" && <AdminLogin state={db.state} />}
+      {db.state === "ok" && <p className="mb-4 text-xs text-success">✓ متصل بقاعدة البيانات — <button className="underline" onClick={() => supabase.auth.signOut()}>خروج</button></p>}
+
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat icon={TrendingUp} label="المبيعات (تجريبي)" value={formatEGP(revenue)} />
         <Stat icon={Receipt} label="الطلبات" value={String(orders.length)} />
         <Stat icon={Package} label="منتجات نشطة" value={String(products.filter((p) => p.status === "active").length)} />
         <Stat icon={AlertTriangle} label="مخزون قليل" value={String(low)} />
       </div>
+
+      <section className="mt-6 rounded-2xl border bg-gradient-surface p-5">
+        <h2 className="mb-3 font-semibold">ملخص الطلبات الجديدة (آخر 24 ساعة)</h2>
+        {fresh.length === 0 ? <p className="text-sm text-muted-foreground">مفيش طلبات جديدة النهارده.</p> : (
+          <div className="grid gap-4 md:grid-cols-3 text-sm">
+            <div><div className="text-2xl font-bold">{fresh.length}</div><div className="text-muted-foreground">طلب جديد بقيمة {formatEGP(fresh.reduce((s, o) => s + o.total, 0))}</div></div>
+            <div><div className="text-2xl font-bold text-warning">{pending.length}</div><div className="text-muted-foreground">طلب مستني مراجعة الدفع</div></div>
+            <ul className="space-y-1">{byPay.map(([k, v]) => <li key={k} className="flex justify-between"><span>{k}</span><b>{v}</b></li>)}</ul>
+          </div>
+        )}
+      </section>
 
       <Tabs defaultValue="products" className="mt-8" dir="rtl">
         <TabsList><TabsTrigger value="products">المنتجات</TabsTrigger><TabsTrigger value="orders">الطلبات</TabsTrigger><TabsTrigger value="integrations">التكاملات</TabsTrigger></TabsList>
