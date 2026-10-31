@@ -191,7 +191,7 @@ function ProductDialog({ product, onClose, onSave }: { product: Product | null; 
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>إلغاء</Button>
-          <Button variant="hero" disabled={!valid} onClick={() => onSave({ ...p, oldPrice: p.oldPrice || undefined })}>حفظ</Button>
+          <Button variant="hero" disabled={!valid} onClick={() => { const { oldPrice, ...rest } = p; onSave(oldPrice ? { ...rest, oldPrice } : rest); }}>حفظ</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

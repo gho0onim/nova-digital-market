@@ -9,14 +9,14 @@ import { useStore } from "@/lib/store";
 import { ProductCard } from "@/components/shop/ProductCard";
 
 type Sort = "popular" | "low" | "high";
-interface ShopSearch { cat?: CategoryId; q?: string; sort?: Sort; stock?: boolean }
+interface ShopSearch { cat?: CategoryId | undefined; q?: string | undefined; sort?: Sort | undefined; stock?: boolean | undefined }
 
 export const Route = createFileRoute("/shop")({
   validateSearch: (s: Record<string, unknown>): ShopSearch => ({
-    cat: CATEGORIES.some((c) => c.id === s.cat) ? (s.cat as CategoryId) : undefined,
-    q: typeof s.q === "string" && s.q ? s.q : undefined,
-    sort: s.sort === "low" || s.sort === "high" ? s.sort : undefined,
-    stock: s.stock === true || s.stock === "true" ? true : undefined,
+    cat: CATEGORIES.some((c) => c.id === s["cat"]) ? (s["cat"] as CategoryId) : undefined,
+    q: typeof s["q"] === "string" && s["q"] ? s["q"] : undefined,
+    sort: s["sort"] === "low" || s["sort"] === "high" ? s["sort"] : undefined,
+    stock: s["stock"] === true || s["stock"] === "true" ? true : undefined,
   }),
   head: () => ({
     meta: [

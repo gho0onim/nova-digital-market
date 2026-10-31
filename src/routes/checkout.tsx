@@ -41,9 +41,9 @@ function Checkout() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const er: Record<string, string> = {};
-    if (form.name.trim().length < 3) er.name = "اكتب اسمك بالكامل";
-    if (!/^01[0125]\d{8}$/.test(form.phone)) er.phone = "رقم موبايل مصري غير صحيح (مثال 01012345678)";
-    if (!/^\S+@\S+\.\S+$/.test(form.email)) er.email = "إيميل غير صحيح";
+    if (form.name.trim().length < 3) er["name"] = "اكتب اسمك بالكامل";
+    if (!/^01[0125]\d{8}$/.test(form.phone)) er["phone"] = "رقم موبايل مصري غير صحيح (مثال 01012345678)";
+    if (!/^\S+@\S+\.\S+$/.test(form.email)) er["email"] = "إيميل غير صحيح";
     setErr(er);
     if (Object.keys(er).length) return;
     setBusy(true);
