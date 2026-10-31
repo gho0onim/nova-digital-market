@@ -2,20 +2,30 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, ShieldCheck, ShoppingBag, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { categoryLabel, formatEGP } from "@/lib/catalog";
+import { DEMO_PRODUCTS, categoryLabel, formatEGP } from "@/lib/catalog";
 import { useStore } from "@/lib/store";
 import { ProductArt } from "@/components/shop/ProductArt";
 import { ProductCard } from "@/components/shop/ProductCard";
 
 export const Route = createFileRoute("/product/$id")({
-  head: () => ({
-    meta: [
-      { title: "تفاصيل المنتج — NOVA VAULT" },
-      { name: "description", content: "تفاصيل المنتج الرقمي وطريقة التسليم والسعر بالجنيه." },
-      { property: "og:title", content: "تفاصيل المنتج — NOVA VAULT" },
-      { property: "og:description", content: "تفاصيل المنتج الرقمي وطريقة التسليم والسعر بالجنيه." },
-    ],
-  }),
+  staticData: { sitemap: true },
+  head: ({ params }) => {
+    const product = DEMO_PRODUCTS.find((x) => x.id === params.id && x.status !== "draft");
+    if (!product) {
+      return { meta: [{ title: "المنتج مش متاح — NOVA VAULT" }, { name: "robots", content: "noindex" }] };
+    }
+    const title = `${product.nameAr} (${product.name}) — NOVA VAULT`;
+    const description = `${product.description} السعر ${formatEGP(product.price)} — ${product.delivery}.`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "product" },
+      ],
+    };
+  },
   component: ProductPage,
 });
 

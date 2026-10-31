@@ -8,12 +8,13 @@ import { FaqList } from "@/components/shop/FaqList";
 import hero from "@/assets/hero.jpg";
 
 export const Route = createFileRoute("/")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "NOVA VAULT — كروت هدايا وشحن ألعاب واشتراكات" },
       { name: "description", content: "متجر رقمي مصري: كروت هدايا، شحن ألعاب، رخص برامج أصلية واشتراكات بالجنيه المصري." },
-      { property: "og:title", content: "NOVA VAULT — متجر المنتجات الرقمية" },
-      { property: "og:description", content: "كروت هدايا، شحن ألعاب، رخص برامج أصلية واشتراكات بالجنيه المصري." },
+      { property: "og:title", content: "NOVA VAULT — كروت هدايا وشحن ألعاب واشتراكات بالجنيه المصري" },
+      { property: "og:description", content: "متجر رقمي مصري: كروت هدايا، شحن ألعاب، رخص برامج أصلية واشتراكات بالجنيه المصري." },
     ],
   }),
   component: Index,
