@@ -80,7 +80,7 @@ function Admin() {
   const updateOrder = async (id: string, status: Order["status"]) => {
     if (db.state === "ok") {
       const { error } = await supabase.from("orders").update({ status }).eq("id", id);
-      if (error) return toast.error("ماقدرناش نحدث الطلب");
+      if (error) { toast.error("ماقدرناش نحدث الطلب"); return; }
       db.setRows((r) => r && r.map((o) => (o.id === id ? { ...o, status } : o)));
       toast.success("تم تحديث الطلب");
     } else updateLocal(id, status);
