@@ -8,6 +8,7 @@ import { cartTotal, formatEGP, PAYMENT_METHODS, type Order } from "@/lib/catalog
 import { useCartLines, useStore } from "@/lib/store";
 import { processPaymentDemo } from "@/lib/integrations";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -57,7 +58,13 @@ function Checkout() {
     };
     try {
       const res = await processPaymentDemo(order);
-      addOrder({ ...order, status: res.ok ? "paid-demo" : "pending" });
+      const final = { ...order, status: (res.ok ? "paid-demo" : "pending") as Order["status"] };
+      const { error } = await supabase.from("orders").insert({
+        id: final.id, customer: final.customer, phone: final.phone, email: final.email,
+        payment: final.payment, items: final.items, total: final.total, status: final.status,
+      });
+      if (error) toast.warning("الطلب اتحفظ على جهازك بس، هنحاول نزامنه بعدين");
+      addOrder(final);
       clearCart();
       nav({ to: "/order/$id", params: { id: order.id } });
     } catch {
