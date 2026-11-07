@@ -20,7 +20,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 function toAuthUser(user: User | null): AuthUser | null {
   if (!user) return null;
-  const displayName = user.user_metadata?.display_name;
+  const displayName = user.user_metadata?.["display_name"];
   return {
     id: user.id,
     email: user.email ?? "",
