@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep browser authentication state in one root-level provider and expose account screens as top-level routes, so navigation reflects real sessions without duplicating auth listeners.

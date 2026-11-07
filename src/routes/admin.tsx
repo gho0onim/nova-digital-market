@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { CATEGORIES, categoryLabel, formatEGP, type Order, type Product } from "@/lib/catalog";
 import { useStore } from "@/lib/store";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -34,21 +35,25 @@ const ORDER_STATUS: Record<Order["status"], string> = { pending: "قيد الا�
 function useDbOrders() {
   const [rows, setRows] = useState<Order[] | null>(null);
   const [state, setState] = useState<"loading" | "guest" | "forbidden" | "ok" | "error">("loading");
-  const load = async () => {
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) { setState("guest"); return; }
-    const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-    if (error) { setState("error"); return; }
-    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: u.user.id, _role: "admin" });
-    if (!isAdmin) { setState("forbidden"); return; }
-    setRows(data.map((r) => ({ id: r.id, createdAt: r.created_at, customer: r.customer, phone: r.phone, email: r.email, payment: r.payment, items: r.items as Order["items"], total: Number(r.total), status: r.status as Order["status"] })));
-    setState("ok");
-  };
+  const { user, loading } = useAuth();
   useEffect(() => {
-    load();
-    const { data } = supabase.auth.onAuthStateChange((e) => { if (e === "SIGNED_IN" || e === "SIGNED_OUT") load(); });
-    return () => data.subscription.unsubscribe();
-  }, []);
+    let cancelled = false;
+    const load = async () => {
+      if (loading) return;
+      if (!user) { setState("guest"); return; }
+      setState("loading");
+      const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+      if (cancelled) return;
+      if (error) { setState("error"); return; }
+      const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      if (cancelled) return;
+      if (!isAdmin) { setState("forbidden"); return; }
+      setRows(data.map((r) => ({ id: r.id, createdAt: r.created_at, customer: r.customer, phone: r.phone, email: r.email, payment: r.payment, items: r.items as Order["items"], total: Number(r.total), status: r.status as Order["status"] })));
+      setState("ok");
+    };
+    void load();
+    return () => { cancelled = true; };
+  }, [user?.id, loading]);
   return { rows, state, setRows };
 }
 

@@ -17,6 +17,7 @@ import { SiteHeader } from "@/components/shop/SiteHeader";
 import { SiteFooter } from "@/components/shop/SiteFooter";
 import { CartDrawer } from "@/components/shop/CartDrawer";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/lib/auth-context";
 
 function NotFoundComponent() {
   return (
@@ -104,13 +105,15 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <StoreProvider>
-        <SiteHeader />
-        <main className="min-h-[70vh]">
-          <Outlet />
-        </main>
-        <SiteFooter />
-        <CartDrawer />
-        <Toaster position="top-center" />
+        <AuthProvider>
+          <SiteHeader />
+          <main className="min-h-[70vh]">
+            <Outlet />
+          </main>
+          <SiteFooter />
+          <CartDrawer />
+          <Toaster position="top-center" />
+        </AuthProvider>
       </StoreProvider>
     </QueryClientProvider>
   );
