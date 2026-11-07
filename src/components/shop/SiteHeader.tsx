@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, LayoutDashboard } from "lucide-react";
+import { ShoppingBag, LayoutDashboard, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store";
+import { useAuth } from "@/lib/auth-context";
 
 export function Logo() {
   return (
@@ -14,6 +15,7 @@ export function Logo() {
 
 export function SiteHeader() {
   const { cart, setCartOpen } = useStore();
+  const { user } = useAuth();
   const count = cart.reduce((s, i) => s + i.qty, 0);
   return (
     <>
@@ -29,6 +31,9 @@ export function SiteHeader() {
             <Link to="/faq" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>الأسئلة الشائعة</Link>
           </nav>
           <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="sm" aria-label={user ? "حسابي" : "تسجيل الدخول"}>
+              <Link to={user ? "/account" : "/auth"}><UserRound /><span className="hidden sm:inline">{user ? (user.displayName || "حسابي") : "دخول"}</span></Link>
+            </Button>
             <Button asChild variant="ghost" size="icon" aria-label="لوحة التحكم">
               <Link to="/admin"><LayoutDashboard /></Link>
             </Button>
