@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { AlertTriangle, Loader2, Lock } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,14 +9,15 @@ import { useCartLines, useStore } from "@/lib/store";
 import { processPaymentDemo } from "@/lib/integrations";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
-      { title: "إتمام الطلب (تجريبي) — NOVA VAULT" },
-      { name: "description", content: "صفحة إتمام طلب تجريبية — لا يتم أي دفع حقيقي." },
+      { title: "إتمام الطلب — NOVA VAULT" },
+      { name: "description", content: "أكمل طلبك وادفع بالمحفظة أو InstaPay." },
       { property: "og:title", content: "إتمام الطلب — NOVA VAULT" },
-      { property: "og:description", content: "صفحة إتمام طلب تجريبية." },
+      { property: "og:description", content: "أكمل طلبك بأمان." },
     ],
   }),
   component: Checkout,
@@ -30,12 +31,22 @@ function Checkout() {
   const [err, setErr] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const total = cartTotal(lines);
+  const { user, loading } = useAuth();
 
   if (ready && lines.length === 0)
     return (
       <div className="py-24 text-center">
         <p className="text-xl font-semibold">السلة فاضية</p>
         <Button variant="hero" className="mt-4" asChild><Link to="/shop">ابدأ التسوق</Link></Button>
+      </div>
+    );
+
+  if (!loading && !user)
+    return (
+      <div className="py-24 text-center">
+        <Lock className="mx-auto mb-3 size-8 text-primary" />
+        <p className="text-xl font-semibold">سجّل دخولك الأول عشان تكمل الطلب</p>
+        <Button variant="hero" className="mt-4" asChild><Link to="/auth">تسجيل الدخول / إنشاء حساب</Link></Button>
       </div>
     );
 
@@ -83,10 +94,6 @@ function Checkout() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
-      <div className="mb-6 flex items-start gap-3 rounded-2xl border border-warning/50 bg-warning/10 p-4 text-warning">
-        <AlertTriangle className="mt-0.5 size-5 shrink-0" />
-        <p className="text-sm"><b>DEMO ONLY:</b> ده دفع تجريبي. مفيش أي بوابة دفع متوصلة ومش هيتخصم أي فلوس. متكتبش بيانات كارت حقيقية.</p>
-      </div>
       <h1 className="mb-6 text-3xl font-bold">إتمام الطلب</h1>
       <form onSubmit={submit} className="grid gap-8 md:grid-cols-[1fr_360px]">
         <div className="space-y-6 rounded-2xl border bg-card p-6">
