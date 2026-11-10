@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { formatEGP } from "@/lib/catalog";
+import { formatEGP, STORE_WALLET, whatsappOrderLink } from "@/lib/catalog";
 import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/order/$id")({
@@ -33,8 +33,17 @@ function OrderPage() {
         <div className="flex justify-between border-t pt-2 font-bold"><span>الإجمالي</span><span>{formatEGP(o.total)}</span></div>
         <div className="flex justify-between text-muted-foreground"><span>الدفع</span><span>{o.payment}</span></div>
       </div>
+      <div className="mt-4 space-y-2 rounded-2xl border bg-card p-5 text-start text-sm">
+        <p className="font-semibold">خطوات إتمام الدفع</p>
+        <p>1. حوّل {formatEGP(o.total)} على المحفظة <span dir="ltr" className="font-bold">{STORE_WALLET}</span> أو InstaPay.</p>
+        <p>2. اضغط الزر وابعت صورة الإيصال على واتساب.</p>
+        <p>3. هنراجع التحويل ونبعتلك المنتج على واتساب.</p>
+      </div>
+      <Button variant="hero" className="mt-4 w-full" asChild>
+        <a href={whatsappOrderLink(o)} target="_blank" rel="noreferrer">إرسال إيصال التحويل على واتساب</a>
+      </Button>
       <div className="mt-4 flex gap-2 rounded-xl border border-warning/40 bg-warning/10 p-3 text-start text-xs text-warning">
-        <Info className="size-4 shrink-0" /> طلب تجريبي: مفيش دفع حقيقي اتعمل ومفيش أكواد هتتبعت. التسليم التلقائي لسه مش متوصل.
+        <Info className="size-4 shrink-0" /> التسليم بيتم يدويًا بعد مراجعة الإيصال.
       </div>
       <Button variant="hero" className="mt-8" asChild><Link to="/shop">كمّل تسوق</Link></Button>
     </div>

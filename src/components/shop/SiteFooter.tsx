@@ -25,7 +25,13 @@ export function SiteFooter() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/faq" className="hover:text-foreground">الأسئلة الشائعة</Link></li>
             <li><Link to="/admin" className="hover:text-foreground">لوحة التحكم (Demo)</Link></li>
-            <li>support@example.com (بريد تجريبي)</li>
+          </ul>
+          <h3 className="mb-3 mt-6 font-semibold">تواصل معنا</h3>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li><a href="https://wa.me/201065773596" target="_blank" rel="noreferrer" className="hover:text-foreground">واتساب</a></li>
+            <li><a href="https://t.me/" target="_blank" rel="noreferrer" className="hover:text-foreground">تيليجرام</a></li>
+            <li><a href="https://facebook.com/" target="_blank" rel="noreferrer" className="hover:text-foreground">فيسبوك</a></li>
+            <li><a href="https://instagram.com/" target="_blank" rel="noreferrer" className="hover:text-foreground">إنستغرام</a></li>
           </ul>
         </div>
       </div>
