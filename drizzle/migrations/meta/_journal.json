@@ -15,6 +15,13 @@
       "when": 1794023531399,
       "tag": "0001_create_customer_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794290157981,
+      "tag": "0002_assign_store_admin",
+      "breakpoints": true
     }
   ]
 }
