@@ -40,11 +40,26 @@ export const CATEGORIES: { id: CategoryId; label: string; emoji: string }[] = [
 ];
 
 export const PAYMENT_METHODS = [
-  { id: "card", label: "كارت بنكي (Visa / Meeza)" },
-  { id: "wallet", label: "محفظة موبايل (Vodafone Cash وغيرها)" },
+  { id: "wallet", label: "محفظة موبايل (فودافون كاش / اتصالات / أورانج / WE)" },
   { id: "instapay", label: "InstaPay" },
-  { id: "fawry", label: "Fawry" },
 ];
+
+export const STORE_WHATSAPP = "201065773596";
+export const STORE_WALLET = "01065773596";
+
+export function whatsappOrderLink(o: Pick<Order, "id" | "customer" | "items" | "total" | "payment">) {
+  const lines = [
+    "السلام عليكم، حولت قيمة طلبي وده إيصال التحويل 👇",
+    `رقم الطلب: #${o.id}`,
+    `الاسم: ${o.customer}`,
+    "المنتجات:",
+    ...o.items.map((i) => `• ${i.name} × ${i.qty}`),
+    `الإجمالي: ${formatEGP(o.total)}`,
+    `طريقة الدفع: ${o.payment}`,
+    "(هرفق صورة الإيصال في الرسالة دي)",
+  ];
+  return `https://wa.me/${STORE_WHATSAPP}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
 
 const p = (o: Omit<Product, "status"> & { status?: ProductStatus }): Product => ({ status: "active", ...o });
 
@@ -64,6 +79,22 @@ export const DEMO_PRODUCTS: Product[] = [
   p({ id: "tl-design", name: "Design Studio Pro – Monthly", nameAr: "Design Studio Pro – شهري", category: "tools", price: 450, stock: 90, featured: true, region: "Global", delivery: "كود تفعيل", description: "أداة تصميم احترافية باشتراك شهري: قوالب جاهزة للمحتوى، خطوط عربية وإنجليزية، وتصدير بجودة عالية. مناسبة لصنّاع المحتوى وأصحاب البيزنس الصغير.", hue: 300 }),
   p({ id: "tl-ai-writer", name: "AI Writing Assistant – 6 Months", nameAr: "مساعد كتابة بالذكاء الاصطناعي", category: "tools", price: 1190, oldPrice: 1400, stock: 35, bestseller: true, region: "Global", delivery: "كود تفعيل", description: "مساعد كتابة بالذكاء الاصطناعي لمدة ٦ شهور يكتب ويلخّص ويترجم بالعربي والإنجليزي — مناسب لمحتوى السوشيال ميديا والرسائل الرسمية والمقالات.", hue: 270 }),
   p({ id: "tl-templates", name: "Social Media Templates Pack", nameAr: "باكدج قوالب سوشيال ميديا", category: "tools", price: 199, stock: 999, region: "Global", delivery: "رابط تحميل", description: "باكدج فيه أكثر من ٥٠٠ قالب سوشيال ميديا قابل للتعديل بالكامل: بوستات وستوريز وأغلفة. رابط تحميل مباشر يظل شغال بدون تاريخ انتهاء.", hue: 45 }),
+  p({ id: "gc-store-1000", name: "Store Gift Card 1000 EGP", nameAr: "كارت هدايا متجر ١٠٠٠ جنيه", category: "gift-cards", price: 1030, stock: 25, region: "مصر", delivery: "كود فوري بعد الدفع", description: "كارت هدايا رقمي بقيمة ١٠٠٠ جنيه، كود واحد يُستخدم مرة واحدة ويوصلك بعد تأكيد الدفع.", hue: 300 }),
+  p({ id: "gc-play-50", name: "Play Wallet Card $50", nameAr: "كارت محفظة ألعاب ٥٠ دولار", category: "gift-cards", price: 2550, stock: 12, region: "US", delivery: "كود رقمي", description: "رصيد ٥٠ دولار للمحفظة الرسمية لشراء الألعاب والإضافات.", hue: 225 }),
+  p({ id: "gc-apps-15", name: "App Store Card $15", nameAr: "كارت متجر تطبيقات ١٥ دولار", category: "gift-cards", price: 790, stock: 30, bestseller: true, region: "US", delivery: "كود رقمي", description: "رصيد لشراء التطبيقات والاشتراكات من متجر التطبيقات الرسمي.", hue: 200 }),
+  p({ id: "gc-console-20", name: "Console Store Card $20", nameAr: "كارت متجر بلايستيشن/إكس بوكس ٢٠ دولار", category: "gift-cards", price: 1050, stock: 20, region: "US", delivery: "كود رقمي", description: "رصيد ٢٠ دولار لمتجر الكونسول الرسمي.", hue: 250 }),
+  p({ id: "gt-mobile-uc-660", name: "Mobile Shooter 660 UC", nameAr: "٦٦٠ شدة لعبة موبايل", category: "game-topups", price: 420, stock: 200, bestseller: true, featured: true, region: "Global", delivery: "شحن على الـ ID", description: "٦٦٠ شدة تتشحن على الـ ID بتاعك خلال دقائق بدون كلمة سر.", hue: 40 }),
+  p({ id: "gt-mobile-uc-1800", name: "Mobile Shooter 1800 UC", nameAr: "١٨٠٠ شدة لعبة موبايل", category: "game-topups", price: 1090, oldPrice: 1200, stock: 150, region: "Global", delivery: "شحن على الـ ID", description: "١٨٠٠ شدة بسعر موفّر، شحن رسمي على الـ ID.", hue: 45 }),
+  p({ id: "gt-diamonds-520", name: "Fire Arena 520 Diamonds", nameAr: "٥٢٠ جوهرة فري أرينا", category: "game-topups", price: 260, stock: 300, bestseller: true, region: "MENA", delivery: "شحن على الـ ID", description: "٥٢٠ جوهرة تتشحن على الـ ID بتاعك فورًا.", hue: 10 }),
+  p({ id: "gt-pass-monthly", name: "Strategy Clash Monthly Pass", nameAr: "تذكرة شهرية لعبة استراتيجية", category: "game-topups", price: 230, stock: 80, region: "Global", delivery: "شحن على الـ ID", description: "التذكرة الشهرية بمكافآت يومية وتسريع البناء.", hue: 90 }),
+  p({ id: "sw-antivirus", name: "Total Security – 1 Year", nameAr: "برنامج حماية شامل – سنة", category: "software", price: 650, oldPrice: 800, stock: 50, region: "Global", delivery: "مفتاح ترخيص أصلي", description: "حماية كاملة من الفيروسات لثلاثة أجهزة لمدة سنة.", hue: 120 }),
+  p({ id: "sw-video-editor", name: "Video Editor Pro – Lifetime", nameAr: "برنامج مونتاج احترافي – مدى الحياة", category: "software", price: 1490, stock: 15, region: "Global", delivery: "مفتاح ترخيص أصلي", description: "رخصة دائمة لبرنامج مونتاج بمؤثرات وتصدير 4K.", hue: 280 }),
+  p({ id: "sub-music-6m", name: "Music Premium – 6 Months", nameAr: "اشتراك موسيقى بريميوم – ٦ شهور", category: "subscriptions", price: 590, stock: 70, bestseller: true, region: "Global", delivery: "كود تفعيل", description: "استماع بدون إعلانات وتحميل أوفلاين لمدة ٦ شهور.", hue: 150 }),
+  p({ id: "sub-video-1y", name: "Video Streaming – 1 Year", nameAr: "اشتراك منصة أفلام ومسلسلات – سنة", category: "subscriptions", price: 2200, oldPrice: 2600, stock: 20, featured: true, region: "مصر", delivery: "كود تفعيل", description: "سنة كاملة من الأفلام والمسلسلات بجودة عالية.", hue: 0 }),
+  p({ id: "sub-gaming-3m", name: "Console Online – 3 Months", nameAr: "اشتراك أونلاين للكونسول – ٣ شهور", category: "subscriptions", price: 780, stock: 40, region: "Global", delivery: "كود تفعيل", description: "لعب أونلاين وألعاب شهرية مجانية لمدة ٣ شهور.", hue: 215 }),
+  p({ id: "tl-ai-chat", name: "AI Chat Plus – Monthly", nameAr: "مساعد ذكاء اصطناعي بلس – شهري", category: "tools", price: 950, stock: 45, bestseller: true, featured: true, region: "Global", delivery: "كود تفعيل", description: "وصول لأقوى نماذج الذكاء الاصطناعي لمدة شهر.", hue: 170 }),
+  p({ id: "tl-canva-1y", name: "Design Pro Team – 1 Year", nameAr: "أداة تصميم برو – سنة", category: "tools", price: 1350, stock: 30, region: "Global", delivery: "دعوة على الإيميل", description: "سنة كاملة من أدوات التصميم الاحترافية والقوالب.", hue: 190 }),
+  p({ id: "tl-fonts-ar", name: "Arabic Fonts Bundle", nameAr: "باكدج خطوط عربية", category: "tools", price: 149, stock: 999, region: "Global", delivery: "رابط تحميل", description: "أكثر من ١٠٠ خط عربي للاستخدام التجاري.", hue: 60 }),
 ];
 
 export const formatEGP = (n: number) =>

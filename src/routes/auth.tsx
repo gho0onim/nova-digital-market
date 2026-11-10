@@ -84,7 +84,7 @@ function AuthPage() {
     }
   };
 
-  const signInWithProvider = async (provider: "google" | "lovable") => {
+  const signInWithProvider = async (provider: "google") => {
     setBusy(true);
     try {
       const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
@@ -179,7 +179,6 @@ function AuthPage() {
             <GoogleMark />
             متابعة باستخدام Google
           </Button>
-          <Button type="button" variant="outline" className="h-11" onClick={() => signInWithProvider("lovable")} disabled={busy}>متابعة باستخدام Lovable</Button>
         </div>
         <p className="mt-5 text-center text-xs leading-6 text-muted-foreground">بإنشاء حساب، أنت توافق على استخدام بيانات الحساب لحفظ ملفك ومشترياتك.</p>
       </div>
