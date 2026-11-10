@@ -15,10 +15,10 @@ import { useAuth } from "@/lib/auth-context";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "لوحة التحكم (تجريبية) — NOVA VAULT" },
-      { name: "description", content: "لوحة تحكم تجريبية لإدارة المنتجات والطلبات." },
+      { title: "لوحة التحكم — NOVA VAULT" },
+      { name: "description", content: "لوحة تحكم لإدارة المنتجات والطلبات." },
       { property: "og:title", content: "لوحة التحكم — NOVA VAULT" },
-      { property: "og:description", content: "لوحة تحكم تجريبية." },
+      { property: "og:description", content: "لوحة تحكم." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -104,12 +104,15 @@ function Admin() {
     toast.success("تم الحفظ (محليًا)");
   };
 
+  if (db.state !== "ok")
+    return <div className="mx-auto max-w-md px-4 py-16">{db.state === "loading" ? <p className="text-center text-muted-foreground">جاري التحقق...</p> : <AdminLogin state={db.state} />}</div>;
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold">لوحة التحكم</h1>
-          <p className="text-sm text-muted-foreground">نموذج تجريبي — التعديلات محفوظة في المتصفح بس، مفيش سيرفر متوصل.</p>
+          
         </div>
         <Button variant="outline" onClick={() => { resetCatalog(); toast("رجّعنا الكتالوج الافتراضي"); }}><RotateCcw /> استرجاع الكتالوج</Button>
       </div>
@@ -118,7 +121,7 @@ function Admin() {
       {db.state === "ok" && <p className="mb-4 text-xs text-success">✓ متصل بقاعدة البيانات — <button className="underline" onClick={() => supabase.auth.signOut()}>خروج</button></p>}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat icon={TrendingUp} label="المبيعات (تجريبي)" value={formatEGP(revenue)} />
+        <Stat icon={TrendingUp} label="المبيعات" value={formatEGP(revenue)} />
         <Stat icon={Receipt} label="الطلبات" value={String(orders.length)} />
         <Stat icon={Package} label="منتجات نشطة" value={String(products.filter((p) => p.status === "active").length)} />
         <Stat icon={AlertTriangle} label="مخزون قليل" value={String(low)} />
