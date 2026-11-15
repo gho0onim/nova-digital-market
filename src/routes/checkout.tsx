@@ -123,7 +123,7 @@ function Checkout() {
           </ul>
           <div className="flex justify-between border-t pt-3 font-bold"><span>الإجمالي</span><span className="font-display text-xl">{formatEGP(total)}</span></div>
           <Button variant="hero" size="lg" className="w-full" disabled={busy}>
-            {busy ? <><Loader2 className="animate-spin" /> جاري المعالجة…</> : <><Lock /> تأكيد الطلب (Demo)</>}
+            {busy ? <><Loader2 className="animate-spin" /> جاري المعالجة…</> : <><Lock /> تأكيد الطلب</>}
           </Button>
         </aside>
       </form>

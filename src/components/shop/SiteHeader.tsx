@@ -13,15 +13,14 @@ export function Logo() {
   );
 }
 
+const ADMIN_EMAIL = "saadbahaa2014@gmail.com";
+
 export function SiteHeader() {
   const { cart, setCartOpen } = useStore();
   const { user } = useAuth();
   const count = cart.reduce((s, i) => s + i.qty, 0);
   return (
     <>
-      <div className="bg-gradient-primary py-1.5 text-center text-xs font-medium text-primary-foreground">
-        نسخة تجريبية (DEMO) — الأسعار والمنتجات للعرض فقط ولا يتم أي دفع حقيقي
-      </div>
       <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
           <Logo />
@@ -34,9 +33,11 @@ export function SiteHeader() {
             <Button asChild variant="ghost" size="sm" aria-label={user ? "حسابي" : "تسجيل الدخول"}>
               <Link to={user ? "/account" : "/auth"}><UserRound /><span className="hidden sm:inline">{user ? (user.displayName || "حسابي") : "دخول"}</span></Link>
             </Button>
-            <Button asChild variant="ghost" size="icon" aria-label="لوحة التحكم">
-              <Link to="/admin"><LayoutDashboard /></Link>
-            </Button>
+            {user?.email === ADMIN_EMAIL && (
+              <Button asChild variant="ghost" size="icon" aria-label="لوحة التحكم">
+                <Link to="/admin"><LayoutDashboard /></Link>
+              </Button>
+            )}
             <Button variant="outline" className="relative" onClick={() => setCartOpen(true)} aria-label="السلة">
               <ShoppingBag /> <span className="hidden sm:inline">السلة</span>
               {count > 0 && <span className="absolute -top-2 -start-2 grid size-5 place-items-center rounded-full bg-gradient-primary text-[11px] font-bold text-primary-foreground">{count}</span>}

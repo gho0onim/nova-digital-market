@@ -17,6 +17,7 @@ export interface Product {
   delivery: string;
   description: string;
   hue: number; // card art hue
+  image?: string; // optional https image URL
 }
 
 export interface Order {

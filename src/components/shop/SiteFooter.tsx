@@ -24,7 +24,6 @@ export function SiteFooter() {
           <h3 className="mb-3 font-semibold">المساعدة</h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/faq" className="hover:text-foreground">الأسئلة الشائعة</Link></li>
-            <li><Link to="/admin" className="hover:text-foreground">لوحة التحكم (Demo)</Link></li>
           </ul>
           <h3 className="mb-3 mt-6 font-semibold">تواصل معنا</h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
@@ -36,7 +35,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t py-5 text-center text-xs text-muted-foreground">
-        © 2026 NOVA VAULT — نموذج أولي تجريبي. جميع الأسماء التجارية والأسعار أمثلة للعرض.
+        © 2026 NOVA VAULT — جميع الحقوق محفوظة.
       </div>
     </footer>
   );

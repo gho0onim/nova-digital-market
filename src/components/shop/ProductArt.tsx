@@ -2,6 +2,11 @@ import { CATEGORIES, type Product } from "@/lib/catalog";
 
 // Generated card art (no third-party brand assets). Hue comes from editable catalog data.
 export function ProductArt({ product, className = "" }: { product: Product; className?: string }) {
+  if (product.image) return (
+    <div className={`relative overflow-hidden rounded-xl bg-muted ${className}`}>
+      <img src={product.image} alt={product.nameAr} loading="lazy" className="absolute inset-0 size-full object-cover" />
+    </div>
+  );
   const emoji = CATEGORIES.find((c) => c.id === product.category)?.emoji;
   return (
     <div

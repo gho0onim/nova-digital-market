@@ -7,10 +7,10 @@ import { useStore } from "@/lib/store";
 export const Route = createFileRoute("/order/$id")({
   head: () => ({
     meta: [
-      { title: "تأكيد الطلب (تجريبي) — NOVA VAULT" },
-      { name: "description", content: "تأكيد طلب تجريبي." },
+      { title: "تأكيد الطلب — NOVA VAULT" },
+      { name: "description", content: "تفاصيل طلبك وخطوات الدفع." },
       { property: "og:title", content: "تأكيد الطلب — NOVA VAULT" },
-      { property: "og:description", content: "تأكيد طلب تجريبي." },
+      { property: "og:description", content: "تفاصيل طلبك وخطوات الدفع." },
       { name: "robots", content: "noindex" },
     ],
   }),

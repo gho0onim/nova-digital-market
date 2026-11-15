@@ -45,7 +45,7 @@ export function CartDrawer() {
             <div className="space-y-3 border-t p-4">
               <div className="flex justify-between font-semibold"><span>الإجمالي</span><span className="font-display text-lg">{formatEGP(total)}</span></div>
               <Button variant="hero" size="lg" className="w-full" asChild onClick={() => setCartOpen(false)}>
-                <Link to="/checkout">إتمام الطلب (Demo)</Link>
+                <Link to="/checkout">إتمام الطلب</Link>
               </Button>
             </div>
           </>

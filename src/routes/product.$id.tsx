@@ -72,7 +72,6 @@ function ProductPage() {
           <Button variant="hero" size="lg" className="w-full sm:w-auto" disabled={out} onClick={() => addToCart(p.id)}>
             <ShoppingBag /> {out ? "غير متاح حاليًا" : "أضف للسلة"}
           </Button>
-          <p className="rounded-xl border border-warning/40 bg-warning/10 p-3 text-xs text-warning">منتج وسعر تجريبي للعرض فقط.</p>
         </div>
       </div>
       {related.length > 0 && (

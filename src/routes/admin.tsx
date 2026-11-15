@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { validateRows, downloadCsv, CSV_HEADERS, type ImportRow } from "@/lib/csv-import";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Pencil, Plus, RotateCcw, Trash2, Package, Receipt, TrendingUp, AlertTriangle } from "lucide-react";
@@ -30,7 +31,7 @@ const STATUS: Record<Product["status"], { l: string; c: string }> = {
   draft: { l: "مسودة", c: "bg-muted text-muted-foreground" },
   out: { l: "نفذ", c: "bg-destructive/15 text-destructive" },
 };
-const ORDER_STATUS: Record<Order["status"], string> = { pending: "قيد الانتظار", "paid-demo": "مدفوع (تجريبي)", "delivered-demo": "تم التسليم (تجريبي)" };
+const ORDER_STATUS: Record<Order["status"], string> = { pending: "قيد الانتظار", "paid-demo": "مدفوع", "delivered-demo": "تم التسليم" };
 
 function useDbOrders() {
   const [rows, setRows] = useState<Order[] | null>(null);
@@ -58,24 +59,10 @@ function useDbOrders() {
 }
 
 function AdminLogin({ state }: { state: string }) {
-  const [email, setEmail] = useState(""); const [pw, setPw] = useState(""); const [busy, setBusy] = useState(false);
-  if (state === "forbidden") return (
-    <div className="mb-6 rounded-2xl border border-warning/50 bg-warning/10 p-4 text-sm text-warning">
-      حسابك مش أدمن، فشايف طلبات جهازك بس. <button className="underline" onClick={() => supabase.auth.signOut()}>خروج</button>
-    </div>
-  );
-  return (
-    <form className="mb-6 flex flex-wrap items-end gap-2 rounded-2xl border bg-card p-4" onSubmit={async (e) => {
-      e.preventDefault(); setBusy(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
-      setBusy(false); if (error) toast.error("بيانات الدخول غلط");
-    }}>
-      <p className="w-full text-sm text-muted-foreground">سجّل دخول كأدمن عشان تشوف كل الطلبات المحفوظة في قاعدة البيانات.</p>
-      <Input dir="ltr" type="email" placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-10 w-56" />
-      <Input dir="ltr" type="password" placeholder="password" value={pw} onChange={(e) => setPw(e.target.value)} className="h-10 w-48" />
-      <Button disabled={busy}>دخول</Button>
-    </form>
-  );
+  const navigate = useNavigate();
+  useEffect(() => { if (state === "guest" || state === "forbidden") void navigate({ to: "/", replace: true }); }, [state, navigate]);
+  if (state === "error") return <p className="text-center text-muted-foreground">حصلت مشكلة، جرّب تاني.</p>;
+  return <p className="text-center text-muted-foreground">جاري التحويل...</p>;
 }
 
 function Admin() {
@@ -117,7 +104,6 @@ function Admin() {
         <Button variant="outline" onClick={() => { resetCatalog(); toast("رجّعنا الكتالوج الافتراضي"); }}><RotateCcw /> استرجاع الكتالوج</Button>
       </div>
 
-      {db.state !== "ok" && db.state !== "loading" && <AdminLogin state={db.state} />}
       {db.state === "ok" && <p className="mb-4 text-xs text-success">✓ متصل بقاعدة البيانات — <button className="underline" onClick={() => supabase.auth.signOut()}>خروج</button></p>}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -142,7 +128,10 @@ function Admin() {
         <TabsList><TabsTrigger value="products">المنتجات</TabsTrigger><TabsTrigger value="orders">الطلبات</TabsTrigger><TabsTrigger value="integrations">التكاملات</TabsTrigger></TabsList>
 
         <TabsContent value="products" className="mt-4">
-          <div className="mb-3 flex justify-end">
+          <CsvImport onImport={(list) => setProducts((l) => { const m = new Map(l.map((x) => [x.id, x])); list.forEach((x) => m.set(x.id, x)); return [...m.values()]; })} />
+          <div className="mb-3 flex flex-wrap justify-end gap-2">
+            <Button variant="outline" onClick={() => downloadCsv("orders.csv", [["id", "date", "customer", "phone", "email", "payment", "items", "total", "status"], ...orders.map((o) => [o.id, o.createdAt, o.customer, o.phone, o.email, o.payment, o.items.map((i) => `${i.name} x${i.qty}`).join(" | "), o.total, o.status])])}>تصدير الطلبات</Button>
+            <Button variant="outline" onClick={() => downloadCsv("products.csv", [[...CSV_HEADERS], ...products.map((p) => [p.id, p.nameAr, p.name, p.category, p.price, p.oldPrice ?? "", p.stock, p.status, p.region, p.description, p.image ?? ""])])}>تصدير المنتجات</Button>
             <Button variant="hero" onClick={() => setEdit({ id: "p" + Date.now(), name: "", nameAr: "", category: "gift-cards", price: 100, stock: 10, status: "draft", region: "مصر", delivery: "كود رقمي", description: "", hue: 295 })}><Plus /> منتج جديد</Button>
           </div>
           <div className="overflow-x-auto rounded-2xl border bg-card">
@@ -174,7 +163,7 @@ function Admin() {
 
         <TabsContent value="orders" className="mt-4">
           {orders.length === 0 ? (
-            <div className="rounded-2xl border border-dashed p-12 text-center text-muted-foreground">لسه مفيش طلبات. اعمل طلب تجريبي من المتجر.</div>
+            <div className="rounded-2xl border border-dashed p-12 text-center text-muted-foreground">لسه مفيش طلبات.</div>
           ) : (
             <div className="overflow-x-auto rounded-2xl border bg-card">
               <table className="w-full min-w-[720px] text-sm">
@@ -252,6 +241,7 @@ function ProductDialog({ product, onClose, onSave }: { product: Product | null; 
           {f("oldPrice", "السعر قبل الخصم", "number")}
           {f("stock", "المخزون", "number")}
           {f("region", "المنطقة")}
+          <div className="sm:col-span-2">{f("image", "رابط صورة المنتج (https://...)", "text", "ltr")}</div>
           <div className="space-y-1">
             <Label>القسم</Label>
             <select value={p.category} onChange={(e) => setP({ ...p, category: e.target.value as Product["category"] })} className="h-9 w-full rounded-md border bg-background px-2">
@@ -274,5 +264,37 @@ function ProductDialog({ product, onClose, onSave }: { product: Product | null; 
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function CsvImport({ onImport }: { onImport: (p: Product[]) => void }) {
+  const [rows, setRows] = useState<ImportRow[] | null>(null);
+  const ok = rows?.filter((r) => r.product) ?? [];
+  return (
+    <div className="mb-4 rounded-2xl border bg-card p-4 text-sm">
+      <div className="flex flex-wrap items-center gap-2">
+        <b>استيراد منتجات من ملف CSV</b>
+        <Button size="sm" variant="outline" onClick={() => downloadCsv("products-template.csv", [[...CSV_HEADERS], ["", "كارت ستيم 10 دولار", "Steam 10$", "gift-cards", 550, 600, 20, "active", "مصر", "كود رقمي", "https://example.com/steam.jpg"]])}>تنزيل نموذج</Button>
+        <input type="file" accept=".csv,text/csv" className="text-xs" onChange={async (e) => { const f = e.target.files?.[0]; if (f) setRows(validateRows(await f.text())); e.target.value = ""; }} />
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">الأقسام: {CATEGORIES.map((c) => c.id).join("، ")} — الحالة: active / draft / out</p>
+      {rows && (
+        <div className="mt-3">
+          <p className="mb-2">سليم: <b className="text-success">{ok.length}</b> — فيه أخطاء: <b className="text-destructive">{rows.length - ok.length}</b></p>
+          <div className="max-h-72 overflow-auto rounded-lg border">
+            <table className="w-full text-xs"><thead><tr className="[&>th]:p-2 [&>th]:text-start"><th>سطر</th><th>المنتج</th><th>السعر</th><th>الحالة</th></tr></thead>
+              <tbody>{rows.map((r) => (
+                <tr key={r.line} className={`border-t [&>td]:p-2 ${r.product ? "" : "bg-destructive/10"}`}>
+                  <td>{r.line}</td><td>{r.product?.nameAr ?? "—"}</td><td>{r.product ? formatEGP(r.product.price) : "—"}</td>
+                  <td>{r.product ? "✓ جاهز" : r.errors.join("، ")}</td>
+                </tr>))}</tbody></table>
+          </div>
+          <div className="mt-2 flex gap-2">
+            <Button size="sm" variant="hero" disabled={!ok.length} onClick={() => { onImport(ok.map((r) => r.product!)); toast.success(`اتضاف ${ok.length} منتج`); setRows(null); }}>حفظ المنتجات السليمة ({ok.length})</Button>
+            <Button size="sm" variant="outline" onClick={() => setRows(null)}>إلغاء</Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
